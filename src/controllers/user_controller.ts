@@ -18,15 +18,16 @@ class UserController {
     return res.json(user);
   }
   async create(req: Request, res: Response) {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
     const usersRepository = getRepository(User);
-    const user = usersRepository.create({ name, email });
+    const user = usersRepository.create({ name, email, password });
     await usersRepository.save(user);
-    return res.status(201).json(user);
+    const newUser = { ...user, password: null };
+    return res.status(201).json(newUser);
   }
   async update(req: Request, res: Response) {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, password } = req.body;
     const usersRepository = getRepository(User);
     const user = await usersRepository.findOne(id);
 
@@ -34,8 +35,9 @@ class UserController {
       return res.status(404).json({ error: "User not found" });
     }
 
-    await usersRepository.update(user, { name });
-    return res.json({ ...user, name });
+    usersRepository.merge(user, { name, password });
+    const newUser = await usersRepository.save(user);
+    return res.json({ ...newUser, name, password: null });
   }
   async destroy(req: Request, res: Response) {
     const { id } = req.params;
