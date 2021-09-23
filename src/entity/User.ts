@@ -1,10 +1,12 @@
 import { hashSync } from "bcrypt";
+import { Session } from "./Session";
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -26,6 +28,9 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany((type) => Session, (session) => session.user)
+  sessions: Session[];
 
   @BeforeInsert()
   @BeforeUpdate()
